@@ -1,7 +1,7 @@
-const bodyParser = require('body-parser')
-const express = require('express')
-const logger = require('morgan')
-const app = express()
+const bodyParser = require('body-parser');
+const express = require('express');
+const logger = require('morgan');
+const app = express();
 const PF = require('pathfinding');
 const {
   fallbackHandler,
@@ -28,8 +28,8 @@ app.post('/start', (request, response) => {
 
   // Response data
   const data = {
-    color: '#7BDFF2',
-    headType: "dead",
+    color: '#F2B5D4',
+    headType: "dead", 
 	  tailType: "hook"
   }
 
