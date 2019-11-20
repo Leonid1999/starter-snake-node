@@ -166,6 +166,86 @@ app.post('/move', (request, response) => {
       
     }
 
+    function setMove(path, head) {
+      if (path[1][0] === head.x && path[1][1] === head.y + 1) {
+        return 'down';
+      } else if (path[1][0] === head.x && path[1][1] === head.y - 1) {
+        return 'up';
+      } else if (path[1][0] === head.x + 1 && path[1][1] === head.y) {
+        return 'right';
+      } else if (path[1][0] === head.x - 1 && path[1][1] === head.y) {
+        return 'left';
+      } else {
+        return 'down';
+      }
+    }
+    
+    //Determines the distance from the snakes head to something
+    const getDistance = (a, b, head) => (Math.abs(a - head.x) + Math.abs(b - head.y));
+    
+    //return the closest food item
+    function findFood(gs) {
+      const allTargets = [];
+      for (let i in gs.board.food) {
+        let distance = getDistance(gs.board.food[i].x, gs.board.food[i].y, myHead);
+        //Add a weight that reduces the likelihood of targeting wall food
+        if (!gs.board.food[i].x || !gs.board.food[i].y || gs.board.food[i].x === gs.board.width - 1 || gs.board.food[i].y === gs.board.height - 1) {
+          distance += 10;
+        }
+        
+        allTargets.push({
+          x: gs.board.food[i].x,
+          y: gs.board.food[i].y,
+          distance: distance
+        });
+    
+      }
+      //Sort by weighted distance
+      allTargets.sort(function (a, b) {
+        return a.distance - b.distance;
+      });
+      //Return the closest
+      return allTargets[0];
+    } 
+    
+    function findTail(gs) {
+      let snakeBody = gs.you;
+      let snakeLength = gs.you.length;
+      if (snakeLength === 1) {
+        return findFood(gs);
+      }
+      let tailPosition = snakeBody.body[snakeLength - 1];
+      return tailPosition;
+    
+    }
+    
+    function getLongestLength(gs) {
+      const allSnakes = gs.board.snakes
+      let longestSnake = 0;
+      for (let snake in allSnakes) {
+        if (allSnakes[snake].id !== gs.you.id) {
+          if (allSnakes[snake].length > longestSnake) {
+            longestSnake = allSnakes[snake].length;
+          }
+        }
+      }
+      return longestSnake;
+    }
+    
+    function chooseTarget(gs) {
+      
+      if (gs.board.snakes.length == 2) {
+        if (gs.you.health > 40) {
+          return findTail(gs);
+        } else {
+          return findFood(gs);
+        }
+      } else {
+        return findFood(gs);
+      }
+    }
+    
+
     snakeResponse.move = validMoves[0].direction;
     return response.json(snakeResponse);
 
@@ -186,84 +266,6 @@ app.post('/move', (request, response) => {
   return response.json(data)
 })
 
-function setMove(path, head) {
-  if (path[1][0] === head.x && path[1][1] === head.y + 1) {
-    return 'down';
-  } else if (path[1][0] === head.x && path[1][1] === head.y - 1) {
-    return 'up';
-  } else if (path[1][0] === head.x + 1 && path[1][1] === head.y) {
-    return 'right';
-  } else if (path[1][0] === head.x - 1 && path[1][1] === head.y) {
-    return 'left';
-  } else {
-    return 'down';
-  }
-}
-
-//Determines the distance from the snakes head to something
-const getDistance = (a, b, head) => (Math.abs(a - head.x) + Math.abs(b - head.y));
-
-//return the closest food item
-function findFood(gs) {
-  const allTargets = [];
-  for (let i in gs.board.food) {
-    let distance = getDistance(gs.board.food[i].x, gs.board.food[i].y, myHead);
-    //Add a weight that reduces the likelihood of targeting wall food
-    if (!gs.board.food[i].x || !gs.board.food[i].y || gs.board.food[i].x === gs.board.width - 1 || gs.board.food[i].y === gs.board.height - 1) {
-      distance += 10;
-    }
-    
-    allTargets.push({
-      x: gs.board.food[i].x,
-      y: gs.board.food[i].y,
-      distance: distance
-    });
-
-  }
-  //Sort by weighted distance
-  allTargets.sort(function (a, b) {
-    return a.distance - b.distance;
-  });
-  //Return the closest
-  return allTargets[0];
-} 
-
-function findTail(gs) {
-  let snakeBody = gs.you;
-  let snakeLength = gs.you.length;
-  if (snakeLength === 1) {
-    return findFood(gs);
-  }
-  let tailPosition = snakeBody.body[snakeLength - 1];
-  return tailPosition;
-
-}
-
-function getLongestLength(gs) {
-  const allSnakes = gs.board.snakes
-  let longestSnake = 0;
-  for (let snake in allSnakes) {
-    if (allSnakes[snake].id !== gs.you.id) {
-      if (allSnakes[snake].length > longestSnake) {
-        longestSnake = allSnakes[snake].length;
-      }
-    }
-  }
-  return longestSnake;
-}
-
-function chooseTarget(gs) {
-  
-  if (gs.board.snakes.length == 2) {
-    if (gs.you.health > 40) {
-      return findTail(gs);
-    } else {
-      return findFood(gs);
-    }
-  } else {
-    return findFood(gs);
-  }
-}
 
 app.post('/end', (request, response) => {
   // NOTE: Any cleanup when a game is complete.
