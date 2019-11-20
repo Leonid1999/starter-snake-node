@@ -228,8 +228,41 @@ function findFood(gs) {
   return allTargets[0];
 } 
 
-function chooseTarget(gs) {
+function findTail(gs) {
+  let snakeBody = gs.you;
+  let snakeLength = gs.you.length;
+  if (snakeLength === 1) {
     return findFood(gs);
+  }
+  let tailPosition = snakeBody.body[snakeLength - 1];
+  return tailPosition;
+
+}
+
+function getLongestLength(gs) {
+  const allSnakes = gs.board.snakes
+  let longestSnake = 0;
+  for (let snake in allSnakes) {
+    if (allSnakes[snake].id !== gs.you.id) {
+      if (allSnakes[snake].length > longestSnake) {
+        longestSnake = allSnakes[snake].length;
+      }
+    }
+  }
+  return longestSnake;
+}
+
+function chooseTarget(gs) {
+  
+  if (gs.board.snakes.length == 2) {
+    if (gs.you.health > 40) {
+      return findTail(gs);
+    } else {
+      return findFood(gs);
+    }
+  } else {
+    return findFood(gs);
+  }
 }
 
 app.post('/end', (request, response) => {
