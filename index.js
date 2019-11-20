@@ -28,7 +28,7 @@ app.post('/start', (request, response) => {
 
   // Response data
   const data = {
-    color: '#000000',
+    color: '#7BDFF2',
     headType: "dead",
 	  tailType: "hook"
   }
@@ -73,7 +73,7 @@ app.post('/move', (request, response) => {
             if (allSnakes[snake].body[0].x - 1 >= 0) {
               grid.setWalkableAt((allSnakes[snake].body[0].x - 1), allSnakes[snake].body[0].y, false);
             }
-            if (allSnakes[snake].body[0].y + 1 < gs.height) {
+            if (allSnakes[snake].body[0].y + 1 < gs.board.height) {
               grid.setWalkableAt(allSnakes[snake].body[0].x, (allSnakes[snake].body[0].y + 1), false);
             }
             if (allSnakes[snake].body[0].y - 1 >= 0) {
@@ -179,16 +179,16 @@ const getDistance = (a, b, head) => (Math.abs(a - head.x) + Math.abs(b - head.y)
 //return the closest food item
 function findFood(gs) {
   const allTargets = [];
-  for (let i in gs.food) {
-    let distance = getDistance(gs.food[i].x, gs.food[i].y, myHead);
+  for (let i in gs.board.food) {
+    let distance = getDistance(gs.board.food[i].x, gs.board.food[i].y, myHead);
     //Add a weight that reduces the likelihood of targeting wall food
-    if (!gs.food[i].x || !gs.food[i].y || gs.food[i].x === gs.board.width - 1 || gs.food[i].y === gs.board.height - 1) {
+    if (!gs.board.food[i].x || !gs.board.food[i].y || gs.board.food[i].x === gs.board.width - 1 || gs.board.food[i].y === gs.board.height - 1) {
       distance += 10;
     }
     
     allTargets.push({
-      x: gs.food[i].x,
-      y: gs.food[i].y,
+      x: gs.board.food[i].x,
+      y: gs.board.food[i].y,
       distance: distance
     });
 
