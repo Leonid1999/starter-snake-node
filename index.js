@@ -167,6 +167,31 @@ app.post('/move', (request, response) => {
       },
     ];
 
+    function checkSelf(gs, pm) {
+      for (let i = 0; i < gs.you.body.data.length-1; i++) {
+        for (let move in pm) {
+          if (pm[move].x === gs.you.body.data[i].x && pm[move].y === gs.you.body.data[i].y) {
+            pm[move].valid = false;
+          }
+        }
+      }
+    }
+
+    //Stop from running into wall
+    function checkEdges(gs, pm) {
+      for (let move in pm) {
+        if (pm[move].x < 0 || pm[move].x >= gs.width) {
+          pm[move].valid = false;
+        }
+        if (pm[move].y < 0 || pm[move].y >= gs.height) {
+          pm[move].valid = false;
+        }
+      }
+    }
+
+    checkSelf(gameState, possibleMoves);
+    checkEdges(gameState, possibleMoves);
+
     
     const validMoves = [];
     for (let i in possibleMoves) {
