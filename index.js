@@ -40,10 +40,11 @@ app.post('/start', (request, response) => {
 app.post('/move', (request, response) => {
   // NOTE: Do something here to generate your move
   const gameState = request.body;
+  console.log(request.body);
 
   const myHead = {
-    x: gameState.you.body[0].x,
-    y: gameState.you.body[0].y
+    x: gameState.you.body.x,
+    y: gameState.you.body.y
   };
   const grid = new PF.Grid(gameState.board.width, gameState.board.height);
 
