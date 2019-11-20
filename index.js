@@ -42,9 +42,55 @@ app.post('/move', (request, response) => {
   const gameState = request.body;
   console.log(request.body);
 
+  function setMove(path, head) {
+    if (path[1][0] === head.x && path[1][1] === head.y + 1) {
+      return 'down';
+    } else if (path[1][0] === head.x && path[1][1] === head.y - 1) {
+      return 'up';
+    } else if (path[1][0] === head.x + 1 && path[1][1] === head.y) {
+      return 'right';
+    } else if (path[1][0] === head.x - 1 && path[1][1] === head.y) {
+      return 'left';
+    } else {
+      return 'down';
+    }
+  }
+  
+  //Determines the distance from the snakes head to something
+  const getDistance = (a, b, head) => (Math.abs(a - head.x) + Math.abs(b - head.y));
+  
+  //return the closest food item
+  function findFood(gs) {
+    const allTargets = [];
+    for (let i in gs.board.food) {
+      let distance = getDistance(gs.board.food[i].x, gs.board.food[i].y, myHead);
+      //Add a weight that reduces the likelihood of targeting wall food
+      if (!gs.board.food[i].x || !gs.board.food[i].y || gs.board.food[i].x === gs.board.width - 1 || gs.board.food[i].y === gs.board.height - 1) {
+        distance += 10;
+      }
+      
+      allTargets.push({
+        x: gs.board.food[i].x,
+        y: gs.board.food[i].y,
+        distance: distance
+      });
+  
+    }
+    //Sort by weighted distance
+    allTargets.sort(function (a, b) {
+      return a.distance - b.distance;
+    });
+    //Return the closest
+    return allTargets[0];
+  } 
+  
+  function chooseTarget(gs) {
+      return findFood(gs);
+  }
+
   const myHead = {
-    x: gameState.you.body.x,
-    y: gameState.you.body.y
+    x: gameState.you.body[0].x,
+    y: gameState.you.body[0].y
   };
   const grid = new PF.Grid(gameState.board.width, gameState.board.height);
 
@@ -160,51 +206,7 @@ app.post('/move', (request, response) => {
 
   return response.json(data)
 })
-function setMove(path, head) {
-  if (path[1][0] === head.x && path[1][1] === head.y + 1) {
-    return 'down';
-  } else if (path[1][0] === head.x && path[1][1] === head.y - 1) {
-    return 'up';
-  } else if (path[1][0] === head.x + 1 && path[1][1] === head.y) {
-    return 'right';
-  } else if (path[1][0] === head.x - 1 && path[1][1] === head.y) {
-    return 'left';
-  } else {
-    return 'down';
-  }
-}
 
-//Determines the distance from the snakes head to something
-const getDistance = (a, b, head) => (Math.abs(a - head.x) + Math.abs(b - head.y));
-
-//return the closest food item
-function findFood(gs) {
-  const allTargets = [];
-  for (let i in gs.board.food) {
-    let distance = getDistance(gs.board.food[i].x, gs.board.food[i].y, myHead);
-    //Add a weight that reduces the likelihood of targeting wall food
-    if (!gs.board.food[i].x || !gs.board.food[i].y || gs.board.food[i].x === gs.board.width - 1 || gs.board.food[i].y === gs.board.height - 1) {
-      distance += 10;
-    }
-    
-    allTargets.push({
-      x: gs.board.food[i].x,
-      y: gs.board.food[i].y,
-      distance: distance
-    });
-
-  }
-  //Sort by weighted distance
-  allTargets.sort(function (a, b) {
-    return a.distance - b.distance;
-  });
-  //Return the closest
-  return allTargets[0];
-} 
-
-function chooseTarget(gs) {
-    return findFood(gs);
-}
 
 app.post('/end', (request, response) => {
   // NOTE: Any cleanup when a game is complete.
